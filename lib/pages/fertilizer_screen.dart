@@ -6,6 +6,9 @@ import '../models/agricultural_data.dart';
 import '../models/fertilizer_recommendation.dart';
 import 'plant_prediction_screen.dart';
 import 'dart:io';
+import 'package:hellow/pages/plant_prediction_screen.dart';
+
+
 
 /// FertilizerScreen is a StatefulWidget that allows users to input agricultural data
 /// and receive fertilizer recommendations based on machine learning predictions.
@@ -244,14 +247,22 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Recommended Fertilizer',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0C2C1E),
-                      ),
-                    ),
+Text(
+  'Hello',
+  style: const TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Color.fromARGB(255, 26, 71, 52), // زيتوني غامق
+    shadows: [
+      Shadow(
+        color: Colors.black26, // ظل خفيف
+        offset: Offset(1, 1),
+        blurRadius: 2,
+      ),
+    ],
+  ),
+),
+
                     const SizedBox(height: 24),
                     Container(
                       width: 120,
@@ -268,6 +279,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                             width: 120,
                             height: 120,
                             fit: BoxFit.contain,
+                            
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
                                 Icons.eco,
@@ -308,13 +320,13 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF116530),
+                          backgroundColor:  const Color.fromARGB(255, 14, 63, 26),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
                         ),
                         child: Text(
-                          'Ok',
+                          'Close',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -360,6 +372,15 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     if (!_isMLServiceInitialized) {
       return Scaffold(
+  appBar: AppBar(
+    title: const Text('Fertilizer Recommendation'),
+    leading: IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        Navigator.pop(context); // يرجعك للصفحة السابقة
+      },
+    ),
+  ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -419,7 +440,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                   child: Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 235, 234, 234), /////////////////////////////////////////// لون الباك جراوند
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30),
@@ -427,16 +448,50 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(height: 12),
-                        // Screen title
-                        Text(
-                          'Fertilizer Analysis',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0C2C1E),
-                          ),
-                        ),
+                        const SizedBox(height: 10),
+
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+  child: Row(
+    children: [
+      IconButton(
+        icon: const Icon(Icons.arrow_back),
+        iconSize: 30, // ✅
+
+        color: Color.fromARGB(255, 14, 63, 26),
+        onPressed: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => PlantPredictionScreen()),
+            (Route<dynamic> route) => false,
+          );
+        },
+      ),
+      const SizedBox(width: 15),
+      Expanded(
+        child: Text(
+          'Fertilizer Analysis',
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.w700,
+            color: const Color.fromARGB(255, 14, 63, 26),
+            letterSpacing: 0,
+            height: 2.5,
+            shadows: [
+              Shadow(
+                color: Colors.black26,
+                offset: Offset(1, 1),
+                blurRadius: 5,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+
+
                         const SizedBox(height: 12),
                         // Scrollable form container
                         Expanded(
@@ -467,12 +522,32 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
+                                                // Soil type label
+                                                Text(
+                                                  'Soil Type',
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF0C2C1E),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 24),
+                                                 // Crop type label
+                                                Text(
+                                                  'Crop Type',
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF0C2C1E),
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 24),
                                                 // Temperature label
                                                 Text(
                                                   'Temperature',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -482,7 +557,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   'Humidity',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -492,27 +567,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   'Soil Moisture',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 24),
-                                                // Soil type label
-                                                Text(
-                                                  'Soil Type',
-                                                  style: const TextStyle(
-                                                    color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 24),
-                                                // Crop type label
-                                                Text(
-                                                  'Crop Type',
-                                                  style: const TextStyle(
-                                                    color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -522,7 +577,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   'Nitrogen',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -532,7 +587,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   'Phosphorus',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -542,7 +597,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   'Potassium',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -555,33 +610,6 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                             child: Column(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                // Temperature input field (-50°C to 50°C)
-                                                _buildInputField(
-                                                  controller: _temperatureController,
-                                                  placeholder: 'Input range',
-                                                  unit: '°C',
-                                                  icon: Icons.thermostat,
-                                                  fieldIndex: 0,
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Humidity input field (0-100%)
-                                                _buildInputField(
-                                                  controller: _humidityController,
-                                                  placeholder: 'Input range',
-                                                  unit: '%',
-                                                  icon: Icons.water_drop,
-                                                  fieldIndex: 1,
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Soil moisture/rainfall input field (0-100%)
-                                                _buildInputField(
-                                                  controller: _rainfallController,
-                                                  placeholder: 'Input range',
-                                                  unit: '%',
-                                                  icon: Icons.water,
-                                                  fieldIndex: 2,
-                                                ),
-                                                const SizedBox(height: 20),
                                                 // Soil type dropdown (Clay, Loamy, Sandy, etc.)
                                                 _buildDropdownField(
                                                   value: _selectedSoilType,
@@ -612,6 +640,34 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                                   icon: Icons.grass,
                                                 ),
                                                 const SizedBox(height: 20),
+                                                // Temperature input field (-50°C to 50°C)
+                                                _buildInputField(
+                                                  controller: _temperatureController,
+                                                  placeholder: 'Input range',
+                                                  unit: '°C',
+                                                  icon: Icons.thermostat,
+                                                  fieldIndex: 0,
+                                                ),
+                                                const SizedBox(height: 16),
+                                                // Humidity input field (0-100%)
+                                                _buildInputField(
+                                                  controller: _humidityController,
+                                                  placeholder: 'Input range',
+                                                  unit: '%',
+                                                  icon: Icons.water_drop,
+                                                  fieldIndex: 1,
+                                                ),
+                                                const SizedBox(height: 16),
+                                                // Soil moisture/rainfall input field (0-100%)
+                                                _buildInputField(
+                                                  controller: _rainfallController,
+                                                  placeholder: 'Input range',
+                                                  unit: '%',
+                                                  icon: Icons.water,
+                                                  fieldIndex: 2,
+                                                ),
+                                                const SizedBox(height: 20),
+                                                
                                                 // Nitrogen input field (0-100 mg/kg)
                                                 _buildInputField(
                                                   controller: _nitrogenController,
@@ -665,7 +721,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _predictFertilizer,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF116530), // Green button
+                                          backgroundColor:  const Color.fromARGB(255, 14, 63, 26), // Green button
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(25), // Pill shape
                                           ),
@@ -717,50 +773,58 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
     required IconData icon,
     required int fieldIndex,
   }) {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAFBF2), // Light green background
+return Container(
+  height: 40,
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 187, 204, 195), // Light green background
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1), // ظل خفيف
+        blurRadius: 4, // درجة التمويه
+        offset: Offset(0, 2), // اتجاه الظل (أسفل قليلًا)
+      ),
+    ],
+  ),
+  child: TextFormField(
+    controller: controller,
+    keyboardType: TextInputType.number,
+    style: const TextStyle(fontSize: 14),
+    onFieldSubmitted: (_) => _scrollToNextField(fieldIndex + 1),
+    decoration: InputDecoration(
+      hintText: placeholder,
+      hintStyle: const TextStyle(
+        color: Colors.black38,
+        fontSize: 12,
+      ),
+      suffixText: unit,
+      suffixStyle: const TextStyle(
+        color: Color.fromARGB(255, 77, 136, 99),
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+      ),
+      prefixIcon: Icon(
+        icon,
+        color: const Color(0xFF116530),
+        size: 18,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: TextInputType.number, // Numeric keyboard
-        style: const TextStyle(fontSize: 14),
-        onFieldSubmitted: (_) => _scrollToNextField(fieldIndex + 1), // Auto-advance
-        decoration: InputDecoration(
-          hintText: placeholder,
-          hintStyle: TextStyle(
-            color: Colors.black38, // Subtle hint text
-            fontSize: 12,
-          ),
-          suffixText: unit, // Display measurement unit
-          suffixStyle: const TextStyle(
-            color: Color(0xFF116530), // Green unit text
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: const Color(0xFF116530), // Green icon
-            size: 18,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none, // No border line
-          ),
-          filled: true,
-          fillColor: const Color(0xFFEAFBF2), // Light green background
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Required field';
-          }
-          return null;
-        },
-      ),
-    );
+      filled: true,
+      fillColor: const Color.fromARGB(255, 187, 204, 195),
+    ),
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Required field';
+      }
+      return null;
+    },
+  ),
+);
+
   }
 
   /// Helper method to build consistent dropdown fields
@@ -788,52 +852,63 @@ class _FertilizerScreenState extends State<FertilizerScreen> with AutomaticKeepA
     // Ensure selected value exists in items list
     final currentValue = items.contains(value) ? value : items.first;
     
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAFBF2), // Light green background
+return Container(
+  height: 40,
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 146, 170, 160), // Light green background
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1), // ظل خفيف
+        blurRadius: 4,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  child: DropdownButtonFormField<String>(
+    value: currentValue,
+    items: items.map((String item) {
+      return DropdownMenuItem<String>(
+        value: item,
+        child: Text(
+          item,
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 14,
+          ),
+        ),
+      );
+    }).toList(),
+    onChanged: onChanged,
+    decoration: InputDecoration(
+      prefixIcon: Icon(
+        icon,
+        color: const Color(0xFF116530), // Green icon
+        size: 18,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
-      child: DropdownButtonFormField<String>(
-        value: currentValue,
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(
-              item,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 14,
-              ),
-            ),
-          );
-        }).toList(),
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            icon,
-            color: const Color(0xFF116530), // Green icon
-            size: 18,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none, // No border line
-          ),
-          filled: true,
-          fillColor: const Color(0xFFEAFBF2), // Light green background
-        ),
-        icon: const Icon(
-          Icons.keyboard_arrow_down,
-          color: Color(0xFF116530), // Green dropdown icon
-          size: 18,
-        ),
-        dropdownColor: const Color(0xFFEAFBF2), // Light green dropdown background
-      ),
-    );
+      filled: true,
+      fillColor: const Color.fromARGB(255, 146, 170, 160), // Same background
+    ),
+    icon: const Icon(
+      Icons.keyboard_arrow_down,
+      color: Color(0xFF116530),
+      size: 18,
+    ),
+    dropdownColor: const Color.fromARGB(255, 198, 214, 207),
+  ),
+);
+
   }
 
   // Add keep alive override
   @override
   bool get wantKeepAlive => true;
 } 
+
+
+//InputDecoration

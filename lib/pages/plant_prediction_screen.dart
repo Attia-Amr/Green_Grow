@@ -287,8 +287,8 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 235, 234, 234),  ///////////////////////////////////////////////////////// لون الخلفيه
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30),
@@ -296,16 +296,28 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 28),
                         // Screen title with consistent styling
-                        Text(
-                          'Soil Analysis',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0C2C1E),
-                          ),
-                        ),
+Text(
+  'Soil Analysis',
+  style: const TextStyle(
+    fontSize: 35,
+    
+    fontWeight: FontWeight.w700,
+    color:  const Color.fromARGB(255, 14, 63, 26),
+    letterSpacing: 0,
+    height: 1,
+    shadows: [
+      Shadow(
+        color: Colors.black26,
+        offset: Offset(1, 1),
+        blurRadius: 2,
+      ),
+    ],
+  ),
+),
+
+
                         const SizedBox(height: 32),
                         // Scrollable form container with bounce physics
                         Expanded(
@@ -342,7 +354,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Soil Type',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -352,7 +364,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'pH Level',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -362,7 +374,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Phosphorus',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -372,7 +384,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Potassium',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -382,7 +394,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Nitrogen',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -392,7 +404,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Temperature',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -402,7 +414,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Humidity',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -412,7 +424,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                                   'Rainfall',
                                                   style: const TextStyle(
                                                     color: Color(0xFF0C2C1E),
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -501,7 +513,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 20),
                                     // Predict Button with loading state
                                     SizedBox(
                                       width: double.infinity,
@@ -509,7 +521,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _predictPlant,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF116530),
+                                          backgroundColor: const Color.fromARGB(255, 14, 63, 26),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(25),
                                           ),
@@ -517,8 +529,8 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                         ),
                                         child: _isLoading
                                             ? const SizedBox(
-                                                width: 24,
-                                                height: 24,
+                                                width: 20,
+                                                height: 20,
                                                 child: CircularProgressIndicator(
                                                   color: Colors.white,
                                                   strokeWidth: 2,
@@ -527,8 +539,8 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                             : Text(
                                                 'Predict',
                                                 style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w500,
                                                   color: Colors.white,
                                                 ),
                                               ),
@@ -561,57 +573,65 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
     required IconData icon,
   }) {
     return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAFBF2), // Light green background
+  height: 40,
+  decoration: BoxDecoration(
+    color: const Color.fromARGB(255, 187, 204, 195), // Light green background
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.10), // لون الشادو وشفافيته
+        blurRadius: 3, // نعومة الشادو
+        offset: Offset(0, 2), // اتجاه الشادو (يمين/يسار، فوق/تحت)
+      ),
+    ],
+  ),
+  child: TextFormField(
+    controller: controller,
+    keyboardType: TextInputType.number,
+    style: const TextStyle(fontSize: 16),
+    decoration: InputDecoration(
+      hintText: placeholder,
+      hintStyle: const TextStyle(
+        color: Color.fromARGB(110, 7, 34, 14),
+        fontSize: 14,
+      ),
+      suffixText: unit,
+      suffixStyle: const TextStyle(
+        color: Color(0xFF116530),
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+      prefixIcon: Icon(
+        icon,
+        color: const Color.fromARGB(255, 14, 85, 40),
+        size: 20,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        style: const TextStyle(fontSize: 16),
-        decoration: InputDecoration(
-          hintText: placeholder,
-          hintStyle: TextStyle(
-            color: Colors.black38,
-            fontSize: 14,
-          ),
-          suffixText: unit,
-          suffixStyle: const TextStyle(
-            color: Color(0xFF116530),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: const Color(0xFF116530),
-            size: 20,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: const Color(0xFFEAFBF2),
-        ),
-        validator: (value) {
-          print('Validating field with value: $value');
-          if (value == null || value.isEmpty) {
-            print('Field validation failed: value is empty');
-            return 'This field is required';
-          }
-          try {
-            final numValue = double.parse(value);
-            print('Field validation passed: $numValue');
-            return null;
-          } catch (e) {
-            print('Field validation failed: $e');
-            return 'Invalid number format';
-          }
-        },
-      ),
-    );
+      filled: true,
+      fillColor: const Color.fromARGB(255, 187, 204, 195),
+    ),
+    validator: (value) {
+      print('Validating field with value: $value');
+      if (value == null || value.isEmpty) {
+        print('Field validation failed: value is empty');
+        return 'This field is required';
+      }
+      try {
+        final numValue = double.parse(value);
+        print('Field validation passed: $numValue');
+        return null;
+      } catch (e) {
+        print('Field validation failed: $e');
+        return 'Invalid number format';
+      }
+    },
+  ),
+);
+
   }
 
   // Helper method to build consistent dropdown fields
@@ -622,53 +642,61 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
     required void Function(String?) onChanged,
     required IconData icon,
   }) {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAFBF2),
-        borderRadius: BorderRadius.circular(12),
+   return Container(
+  height: 40,
+  decoration: BoxDecoration(
+    color: const Color(0xFFEAFBF2),
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.10), // لون الظل وشفافيته
+        blurRadius: 3, // نعومة الظل
+        offset: const Offset(0, 2), // اتجاه الظل (يمين/يسار، فوق/تحت)
       ),
-      child: DropdownButtonFormField<String>(
+    ],
+  ),
+  child: DropdownButtonFormField<String>(
+    value: value,
+    items: items.map((String value) {
+      return DropdownMenuItem<String>(
         value: value,
-        items: items.map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-              ),
-            ),
-          );
-        }).toList(),
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            icon,
-            color: const Color(0xFF116530),
-            size: 20,
+        child: Text(
+          value,
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 16,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: const Color(0xFFEAFBF2),
         ),
-        icon: const Icon(
-          Icons.keyboard_arrow_down,
-          color: Color(0xFF116530),
-          size: 20,
-        ),
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 16,
-        ),
-        dropdownColor: const Color(0xFFEAFBF2),
+      );
+    }).toList(),
+    onChanged: onChanged,
+    decoration: InputDecoration(
+      prefixIcon: Icon(
+        icon,
+        color: const Color.fromARGB(255, 10, 88, 39),
+        size: 20,
       ),
-    );
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      filled: true,
+      fillColor: const Color.fromARGB(255, 146, 170, 160),
+    ),
+    icon: const Icon(
+      Icons.keyboard_arrow_down,
+      color: Color.fromARGB(255, 22, 73, 41),
+      size: 20,
+    ),
+    style: const TextStyle(
+      color: Colors.black87,
+      fontSize: 16,
+    ),
+    dropdownColor: const Color.fromARGB(255, 198, 214, 207),
+  ),
+);
+
   }
 
   // Shows the prediction result in a modal dialog
@@ -689,10 +717,21 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Recommended Plants',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+Text(
+  'Recommended Plants',
+  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+    fontWeight: FontWeight.w800, // خط أثقل شوي
+    color:const Color.fromARGB(255, 14, 63, 26), // لون زيتوني غامق
+    shadows: [
+      Shadow(
+        color: Colors.black.withOpacity(0.15), // تقليل الشادو للـ 15%
+        offset: const Offset(1, 1), // تقليل المسافة
+        blurRadius: 2, // تقليل نعومة الشادو
+      ),
+    ],
+  ),
+),
+
                 const SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
@@ -715,7 +754,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.green.shade300,
+                                      const Color.fromARGB(255, 112, 172, 115),
                                     ),
                                   ),
                                 ),
@@ -792,16 +831,20 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: Text('Close'),
-                      ),
-                    ),
+Expanded(
+  child: TextButton(
+    onPressed: () {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    },
+    style: TextButton.styleFrom(
+      foregroundColor: Colors.grey[800], // رصاصي غامق
+    ),
+    child: const Text('Close'),
+  ),
+),
+
                     Expanded(
                       flex: 2,
                       child: ElevatedButton(
@@ -812,7 +855,7 @@ class _PlantPredictionScreenState extends State<PlantPredictionScreen> with Auto
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF116530),
+                          backgroundColor: const Color.fromARGB(255, 9, 65, 30),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),

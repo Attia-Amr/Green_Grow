@@ -41,7 +41,6 @@ dependencies:
   flutter_spinkit: ^5.2.0
   flutter_markdown: ^0.6.18+3
   uuid: ^4.3.3
-  speech_to_text: ^6.3.0
   flutter_tts: ^3.8.3
   collection: ^1.17.0
   flutter_image_compress: ^2.0.0

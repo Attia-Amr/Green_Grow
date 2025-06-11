@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -6,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,10 +74,9 @@ class CommunityPage extends StatelessWidget {
         ),
       ),
 body: Container(
-  color: Colors.grey[300], // لون الخلفية الرمادية
+  color: Colors.grey[300], 
   child: Column(
     children: [
-      // User Info Section
       Container(
         padding: const EdgeInsets.all(12),
         decoration: const BoxDecoration(
@@ -112,7 +112,6 @@ body: Container(
       ),
       const SizedBox(height: 5),
 
-      // Post Stream Section
       Expanded(
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -153,6 +152,10 @@ body: Container(
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+
+
 class PostCard extends StatefulWidget {
   final QueryDocumentSnapshot post;
   const PostCard({super.key, required this.post});
@@ -169,7 +172,8 @@ class _PostCardState extends State<PostCard> {
   @override
   void initState() {
     super.initState();
-    likes = widget.post['likes'] ?? 0;
+    final data = widget.post.data() as Map<String, dynamic>;
+    likes = data.containsKey('likes') ? data['likes'] ?? 0 : 0;
     _checkIfLiked();
   }
 
@@ -181,6 +185,7 @@ class _PostCardState extends State<PostCard> {
           .collection('likes')
           .doc(user!.uid)
           .get();
+      if (!mounted) return;
       setState(() {
         isLiked = doc.exists;
       });
@@ -196,19 +201,20 @@ class _PostCardState extends State<PostCard> {
         .collection('likes')
         .doc(user!.uid);
 
-    final postRef =
-        FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
 
     if (isLiked) {
       await likeRef.delete();
       await postRef.update({'likes': FieldValue.increment(-1)});
+      if (!mounted) return;
       setState(() {
-        likes--;
+        likes = (likes > 0) ? likes - 1 : 0;
         isLiked = false;
       });
     } else {
       await likeRef.set({'likedAt': Timestamp.now()});
       await postRef.update({'likes': FieldValue.increment(1)});
+      if (!mounted) return;
       setState(() {
         likes++;
         isLiked = true;
@@ -216,11 +222,54 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  void _editPost() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPostPage(postId: widget.post.id),
+      ),
+    );
+  }
+
+  void _deletePost() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Delete'),
+        content: const Text('Are you sure you want to delete this post?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await FirebaseFirestore.instance.collection('posts').doc(widget.post.id).delete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userEmail = widget.post['userName'] ?? 'Unknown Farmer';
-    final content = widget.post['content'] ?? '';
-    final imageUrl = widget.post['imageUrl'] ?? '';
+    final data = widget.post.data() as Map<String, dynamic>;
+
+    final userName = data.containsKey('userName') ? data['userName'] : 'Unknown Farmer';
+    final userEmail = data.containsKey('userEmail') ? data['userEmail'] : '';
+    final content = data.containsKey('content') ? data['content'] : '';
+    final imageUrl = data.containsKey('imageUrl') ? data['imageUrl'] : '';
+    final timestamp = data.containsKey('timestamp') ? data['timestamp'] as Timestamp : Timestamp.now();
+
+    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(timestamp.toDate());
+
+    // Debugging: Print user email to check
+    print('Post userEmail: $userEmail');
+    print('Current userEmail: ${user?.email}');
 
     return Card(
       margin: const EdgeInsets.all(10),
@@ -237,13 +286,32 @@ class _PostCardState extends State<PostCard> {
                   child: Icon(Icons.person, color: Colors.white),
                 ),
                 const SizedBox(width: 8),
-                Text(userEmail,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                Text(
+                  formattedDate,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const Spacer(),
+                // Here we check if the current user is the one who created the post
+                if (user != null && userEmail.trim().toLowerCase() == user!.email!.trim().toLowerCase())
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 18),
+                        onPressed: _editPost,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, size: 18),
+                        onPressed: _deletePost,
+                      ),
+                    ],
+                  ),
               ],
             ),
             const SizedBox(height: 8),
             Text(content),
-            if (imageUrl != '') ...[
+            if (imageUrl.isNotEmpty) ...[
               const SizedBox(height: 10),
               Image.network(imageUrl),
             ],
@@ -261,13 +329,88 @@ class _PostCardState extends State<PostCard> {
                 const Spacer(),
                 CommentCountButton(postId: widget.post.id),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+class EditPostPage extends StatefulWidget {
+  final String postId;
+  const EditPostPage({super.key, required this.postId});
+
+  @override
+  State<EditPostPage> createState() => _EditPostPageState();
+}
+
+class _EditPostPageState extends State<EditPostPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _contentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPostData();
+  }
+
+  void _loadPostData() async {
+    final doc = await FirebaseFirestore.instance.collection('posts').doc(widget.postId).get();
+    if (doc.exists && doc.data() != null && doc.data()!.containsKey('content')) {
+      _contentController.text = doc['content'] ?? '';
+    }
+  }
+
+  void _updatePost() async {
+    if (_formKey.currentState!.validate()) {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .update({'content': _contentController.text});
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit Post')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _contentController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: 'Post Content',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Content cannot be empty' : null,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _updatePost, child: const Text('Update Post')),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -368,7 +511,7 @@ class _AddPostPageState extends State<AddPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Colors.grey[300], // خلفية ناعمة رمادي فاتح
+      backgroundColor:  Colors.grey[300], 
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(85),
         child: ClipRRect(
@@ -506,13 +649,6 @@ body: SingleChildScrollView(
     ],
   ),
 )
-
-
-
-
-
-
-
     );
   }
 }
@@ -566,85 +702,87 @@ class _CommentsPageState extends State<CommentsPage> {
     }
   }
 
-  Future<void> _editComment(String commentId, String oldComment) async {
-    _controller.text = oldComment;
+Future<void> _editComment(String commentId, String oldComment) async {
+  _controller.text = oldComment;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: const Color.fromARGB(255, 243, 242, 242),  // ← لون الخلفية الجديد
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: const Text(
+          'Edit Comment',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 32, 94, 34),
           ),
-          title: const Text(
-            'Edit Comment',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 32, 94, 34),
-            ),
-          ),
-          content: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Edit your comment...',
-                hintStyle: const TextStyle(color: Color.fromARGB(255, 32, 94, 34)),
-                filled: true,
-                fillColor: Colors.white,
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color.fromARGB(255, 32, 94, 34), width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color.fromARGB(255, 32, 94, 34), width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+        ),
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: 'Edit your comment...',
+              hintStyle: const TextStyle(color: Color.fromARGB(255, 32, 94, 34)),
+              filled: true,
+              fillColor: Colors.white,
+              enabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Color.fromARGB(255, 32, 94, 34), width: 2),
+                borderRadius: BorderRadius.circular(12),
               ),
-              style: const TextStyle(color: Color.fromARGB(255, 32, 94, 34)),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                if (_controller.text.isNotEmpty) {
-                  FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(widget.postId)
-                      .collection('comments')
-                      .doc(commentId)
-                      .update({
-                    'comment': _controller.text.trim(),
-                    'timestamp': Timestamp.now(),
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text(
-                'Save',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 32, 94, 34),
-                  fontWeight: FontWeight.bold,
-                ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Color.fromARGB(255, 32, 94, 34), width: 2),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            TextButton(
-              onPressed: () {
+            style: const TextStyle(color: Color.fromARGB(255, 32, 94, 34)),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              if (_controller.text.isNotEmpty) {
+                FirebaseFirestore.instance
+                    .collection('posts')
+                    .doc(widget.postId)
+                    .collection('comments')
+                    .doc(commentId)
+                    .update({
+                  'comment': _controller.text.trim(),
+                  'timestamp': Timestamp.now(),
+                });
                 Navigator.pop(context);
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
+              }
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Color.fromARGB(255, 32, 94, 34),
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -754,23 +892,42 @@ class _CommentsPageState extends State<CommentsPage> {
                         leading: const CircleAvatar(
                           backgroundImage: AssetImage('images/girl.jpg'),
                         ),
-                        title: Text(
-                          name,
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
+title: Row(
+  children: [
+    Expanded(
+      child: Text(
+        name,
+        style: const TextStyle(
+          color: Color.fromARGB(255, 0, 0, 0),
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+    ),
+    const SizedBox(width: 8), // مسافة صغيرة بين الاسم والتاريخ
+    Text(
+      DateFormat('d MMM yyyy, h:mm a').format(
+        (comment['timestamp'] as Timestamp).toDate(),
+      ),
+      style: const TextStyle(
+        color: Colors.grey,
+        fontSize: 12,
+      ),
+    ),
+  ],
+),
+
+
                         subtitle: Text(
                           text,
-                          style: const TextStyle(
+                          style: const TextStyle( 
                             color: Color.fromARGB(255, 0, 0, 0),
                             fontSize: 16,
                           ),
                         ),
-                        trailing: currentUser?.email?.split('@')[0] == name
+                        trailing: currentUser?.email?.split('@')[0] == name    
                             ? PopupMenuButton<String>(
+                              
                                 onSelected: (value) {
                                   if (value == 'edit') {
                                     _editComment(commentId, text);
