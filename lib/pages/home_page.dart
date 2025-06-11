@@ -1,0 +1,1033 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:hellow/pages/about_us_page.dart';
+import 'package:hellow/pages/help_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:hellow/pages/sign_page.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hellow/pages/contact_page.dart';
+import 'package:hellow/pages/list_page.dart';
+import 'package:hellow/pages/shopping_page.dart';
+import 'package:hellow/pages/profile_page.dart';
+
+const kPrimaryColor = Color(0xFF0A3521);
+const kGradientEnd = Color(0xFF020503);
+const kBackgroundColor = Color(0xFFF5F2E8); // ✅ واحدة بس
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  static const List<Map<String, String>> crops = [
+    {'image': 'images/strawberry.jpg', 'title': 'strawberry', 'description': 'Strawberries are rich in vitamin C and antioxidants, which help boost the immune system and promote healthy skin.', 'category': 'Fruit'},
+    {'image': 'images/peas.jpg', 'title': 'peas', 'description': 'Peas are small, round, and rich in protein and fiber, making them a nutritious vegetable.', 'category': 'Vegetable'},
+    {'image': 'images/potatoes.jpg', 'title': 'potatoes', 'description': 'Potatoes are a starchy root vegetable that serves as a staple food in many cuisines worldwide.', 'category': 'Root'},
+    {'image': 'images/eggplant.jpg', 'title': 'eggplant', 'description': 'Eggplants belong to the nightshade family and are technically a fruit, even though they’re commonly used as a vegetable in cooking.', 'category': 'Vegetable'},
+    {'image': 'images/corn.jpg', 'title': 'corn', 'description': 'Corn is a cereal grain that’s rich in carbohydrates and provides fiber, vitamins like B1 and folate, and antioxidants like lutein, which support eye health.', 'category': 'Grain'},
+    {'image': 'images/mango.jpg', 'title': 'mango', 'description': 'Mango is a tropical fruit rich in vitamin C, vitamin A, and antioxidants, known for its sweet taste and juicy texture.', 'category': 'Fruit'},
+    {'image': 'images/kiwi.jpg', 'title': 'kiwi', 'description': 'Kiwi is a small fruit packed with vitamin C, fiber, and antioxidants. It helps support the immune system and digestion.', 'category': 'Fruit'},
+    {'image': 'images/taro.jpg', 'title': 'taro', 'description': 'Taro is a root vegetable with a mild, nutty flavor. It’s rich in fiber and nutrients but must be cooked before eating, as it can be toxic when raw.', 'category': 'Root'},
+    {'image': 'images/carrot.jpg', 'title': 'Carrot', 'description': 'Carrots are rich in vitamin A and promote good vision and overall eye health.', 'category': 'Root'},
+    {'image': 'images/Wheat.jpg', 'title': 'Wheat', 'description': 'Wheat is a staple grain used to make flour, bread, and pasta, providing essential carbohydrates and nutrients.', 'category': 'Grain'},
+    {'image': 'images/Broccoli.jpg', 'title': 'Broccoli', 'description': 'Broccoli is a nutrient-dense vegetable rich in vitamins C and K, known for its antioxidant and anti-inflammatory benefits.', 'category': 'Vegetable'}
+  ];
+  
+  final List<String> categories = ['All', 'Fruit', 'Vegetable', 'Root', 'Grain'];
+  String selectedCategory = 'All';
+
+  List<Map<String, String>> get filteredCrops {
+    if (selectedCategory == 'All') return crops;
+    return crops.where((crop) => crop['category'] == selectedCategory).toList();  
+  }
+
+  // Method to get current user data
+  Future<User?> getCurrentUser() async {
+    return FirebaseAuth.instance.currentUser;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 15, 77, 48),
+                Color.fromARGB(255, 5, 14, 8),
+              ],
+              stops: [0.3, 1.0], 
+              end: Alignment.topLeft,
+              begin: Alignment.bottomRight,
+            ), 
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'GREEN GROW',
+          style: TextStyle(
+            fontSize: 37,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Cairo',
+            color: kBackgroundColor, // اللون الكريمي
+          ),
+        ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: kBackgroundColor),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        backgroundColor: const Color.fromARGB(255, 243, 242, 242), 
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 15, 77, 48),
+                    Color.fromARGB(255, 5, 14, 8),
+                  ],
+                  stops: [0.3, 6.0], 
+                  end: Alignment.topLeft,
+                  begin: Alignment.bottomRight,
+                ),
+              ),
+child: FutureBuilder<User?>(
+  future: getCurrentUser(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasData) {
+      User? user = snapshot.data;
+      String displayName = user?.displayName ?? "Guest";
+      String email = user?.email ?? "Not Available";
+
+      // حذف الجزء الذي بعد @ في البريد الإلكتروني
+      String displayNameFromEmail = email.split('@').first;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage('images/chat.jpg'),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.dark_mode, color: Colors.white),
+                onPressed: () {
+                  // TODO: تفعيل/إلغاء الوضع الداكن
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '" $displayNameFromEmail "',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      user?.phoneNumber ?? "Not Available",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 18),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfilePage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      return const Center(child: Text("No User Data"));
+    }
+  },
+),
+
+            ),
+            ListTile(
+              leading: const Icon(Icons.phone, color: Colors.black),
+              title: const Text('Contact Companies', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ContactCompaniesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: Colors.black),
+              title: const Text('Shopping Support', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ShoppingPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list, color: Colors.black),
+              title: const Text('To-Do List', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TodoListPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications, color: Colors.black),
+              title: const Text('Notifications', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                // Add notifications page logic here
+              },
+            ),
+            const Divider(),
+                        ListTile(
+              leading: const Icon(Icons.info_outline, color: Colors.black),
+              title: const Text('About Us', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutUsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline, color: Colors.black),
+              title: const Text('Help', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HelpPage()),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.black),
+              title: const Text('Logout', style: TextStyle(color: Colors.black)),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignPage()),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+body: Container(
+  color: Colors.grey[300], // هنا يتم إضافة اللون الرمادي الخلفي
+  child: CustomScrollView(
+    slivers: [
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: _SliverHeaderDelegate(
+          minHeight: 235,
+          maxHeight: 235,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 15, 77, 48),
+                  Color.fromARGB(255, 5, 14, 8),
+                ],
+                stops: [0.3, 1.0],
+                end: Alignment.topLeft,
+                begin: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(35),
+                bottomRight: Radius.circular(35),
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color.fromARGB(66, 47, 49, 48),
+                  blurRadius: 15,
+                  spreadRadius: 15,
+                ),
+              ],
+            ),
+child: FutureBuilder<User?>(
+  future: getCurrentUser(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasData) {
+      User? user = snapshot.data;
+      String displayName = user?.displayName ?? "Guest";
+      
+      // إذا لم يكن displayName موجودًا، استخدم البريد الإلكتروني (بدون الجزء بعد @)
+      String displayNameFromEmail = user?.email?.split('@').first ?? "Guest";
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              '" Welcome $displayNameFromEmail"',
+              style: const TextStyle(
+                color: Color.fromARGB(255, 168, 192, 168),
+                fontSize: 20,
+              ),
+            ),
+          ),
+          const WeatherCard(),
+        ],
+      );
+    } else {
+      return const Center(child: Text("No User Data"));
+    }
+  },
+),
+
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: DropdownButton<String>(
+            isExpanded: true,
+            value: selectedCategory,
+            items: categories.map((cat) {
+              return DropdownMenuItem(
+                value: cat,
+                child: Text(cat),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedCategory = value!;
+              });
+            },
+          ),
+        ),
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final crop = filteredCrops[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+              child: VegetableCard(
+                imagePath: crop['image']!,
+                title: crop['title']!,
+                description: crop['description']!,
+              ),
+            );
+          },
+          childCount: filteredCrops.length,
+        ),
+      ),
+    ],
+  ),
+)
+
+);
+
+  }
+}
+class WeatherCard extends StatefulWidget {
+  const WeatherCard({super.key});
+
+  @override
+  State<WeatherCard> createState() => _WeatherCardState();
+}
+
+class _WeatherCardState extends State<WeatherCard> {
+  late Future<Map<String, dynamic>> _weatherData;
+
+  @override
+  void initState() {
+    super.initState();
+    _weatherData = fetchWeather();
+  }
+
+  Future<Map<String, dynamic>> fetchWeather() async {
+   const apiKey = 'f7819d3187cda34a07b4607af0be2db1'; // 🔑 استبدله بمفتاحك من OpenWeatherMap
+
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled.');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permissions are permanently denied.');
+    }
+
+    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final lat = position.latitude;
+    final lon = position.longitude;
+
+    final url = 'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load weather');
+    }
+  }
+
+  String _getWeekday(int day) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[day - 1];
+  }
+
+  String _getMonth(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _weatherData,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Text('Failed to load weather');
+        } else {
+          final data = snapshot.data!;
+          final temp = data['main']['temp'].toStringAsFixed(1);
+          final city = data['name'];
+          final country = data['sys']['country'];
+          final date = DateTime.now();
+          final formattedDate = '${_getWeekday(date.weekday)} ${date.day} ${_getMonth(date.month)}';
+
+          return Card(
+            elevation: 4,
+          
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            color: Colors.grey[300],
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('$city, $country', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 10),
+                      Text('$temp°C', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                      Text(formattedDate, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                    ],
+                  ),
+                  const Icon(Icons.wb_sunny, size: 48, color: Colors.orange),
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
+
+
+
+
+
+
+// class VegetableCard extends StatelessWidget {
+//   final String imagePath;
+//   final String title;
+//   final String description;
+
+//   const VegetableCard({
+//     super.key,
+//     required this.imagePath,
+//     required this.title,
+//     required this.description,
+//   });
+
+//   void _showDetails(BuildContext context) {
+//   String bestSeason = '';
+//   String growthDuration = '';
+//   String waterRequirement = '';
+//   String careInstructions = '';
+
+//  switch (title.toLowerCase()) {
+//   case 'strawberry':
+//     bestSeason = 'Spring and Fall';
+//     growthDuration = '3 to 4 months';
+//     waterRequirement = 'Regular watering, keeping the soil moist but not waterlogged';
+//     careInstructions = 'Trim damaged leaves and mulch the soil with straw to protect the fruits';
+//     break;
+
+//   case 'peas':
+//     bestSeason = 'Winter and early Spring';
+//     growthDuration = '60 to 70 days';
+//     waterRequirement = 'Moderate watering as needed, avoiding soil dryness';
+//     careInstructions = 'Provide climbing support and remove weeds';
+//     break;
+
+//   case 'potatoes':
+//     bestSeason = 'Late Winter to early Spring';
+//     growthDuration = '90 to 120 days';
+//     waterRequirement = 'Regular watering, especially during tuber formation';
+//     careInstructions = 'Partially dig to check size, remove infected plants';
+//     break;
+
+//   case 'carrot':
+//     bestSeason = 'Fall and Spring';
+//     growthDuration = '70 to 80 days';
+//     waterRequirement = 'Regular, keep soil moist but not waterlogged';
+//     careInstructions = 'Thin seedlings for better growth and ensure loose, well-drained soil';
+//     break;
+
+//   case 'wheat':
+//     bestSeason = 'Fall (for winter wheat) or Spring (for spring wheat)';
+//     growthDuration = '110 to 130 days';
+//     waterRequirement = 'Moderate, avoid overwatering';
+//     careInstructions = 'Plant in well-drained soil, ensure adequate nitrogen supply, and control weeds';
+//     break;
+
+//   case 'broccoli':
+//     bestSeason = 'Cool seasons (Fall and Spring)';
+//     growthDuration = '80 to 100 days';
+//     waterRequirement = 'Regular watering, around 1-1.5 inches per week';
+//     careInstructions = 'Ensure full sun, fertilize regularly, and protect from pests';
+//     break;
+
+//   case 'eggplant':
+//     bestSeason = 'Summer and early Fall';
+//     growthDuration = '100 to 120 days';
+//     waterRequirement = 'Regular watering, keeping soil consistently moist';
+//     careInstructions = 'Stake plants for support, fertilize regularly, and monitor for pests';
+//     break;
+
+//   case 'corn':
+//     bestSeason = 'Spring and Summer';
+//     growthDuration = '60 to 100 days';
+//     waterRequirement = 'Frequent watering, especially during pollination';
+//     careInstructions = 'Plant in blocks for good pollination, weed regularly, and ensure full sun';
+//     break;
+
+//   case 'mango':
+//     bestSeason = 'Tropical climates, best in Spring';
+//     growthDuration = '3 to 5 years (tree maturity)';
+//     waterRequirement = 'Deep watering weekly, less frequent once mature';
+//     careInstructions = 'Prune to shape, fertilize regularly, and protect from frost';
+//     break;
+
+//   case 'kiwi':
+//     bestSeason = 'Spring and early Summer';
+//     growthDuration = '3 to 5 years (vine maturity)';
+//     waterRequirement = 'Regular deep watering, keeping soil consistently moist';
+//     careInstructions = 'Provide strong trellis support, prune yearly, and protect from frost';
+//     break;
+
+//   case 'taro':
+//     bestSeason = 'Warm seasons (Spring and Summer)';
+//     growthDuration = '180 to 200 days';
+//     waterRequirement = 'High water needs, requires constantly moist soil';
+//     careInstructions = 'Grow in well-drained, moist soil, and ensure warm temperatures';
+//     break;
+
+//   default:
+//     bestSeason = 'Suitable season for the type';
+//     growthDuration = 'Approximate growth duration';
+//     waterRequirement = 'Appropriate water amount';
+//     careInstructions = 'Moderate care as needed';
+// }
+
+
+
+
+
+//   showDialog(
+//     context: context,
+//     builder: (_) => Dialog(
+//       child: Directionality(
+//         textDirection: TextDirection.ltr, // يجعل النصوص تبدأ من اليسار
+//         child: Container(
+//           padding: EdgeInsets.all(15),
+        
+//           decoration: BoxDecoration(
+//             color: const Color.fromARGB(255, 241, 241, 239),  // لون الخلفية الجديد
+//             borderRadius: BorderRadius.circular(16),
+//           ),
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             crossAxisAlignment: CrossAxisAlignment.start, // لضبط جميع النصوص لليسار
+//             children: [
+//               Text(
+//                 'Information about $title',
+//                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+//                 textAlign: TextAlign.left,
+//               ),
+//               Divider(),
+//               _buildInfoRow('Best planting season:', bestSeason),
+//               _buildInfoRow('Growth duration:', growthDuration),
+//               _buildInfoRow('Water requirement:', waterRequirement),
+//               _buildInfoRow('Care instructions:', careInstructions),
+//               _buildInfoRow('Additional info:', description),
+//               SizedBox(height:10),
+//               Align(
+//                 alignment: Alignment.centerRight,
+//                 child: TextButton(
+//                   onPressed: () => Navigator.pop(context),
+//                   child: Text('Close', style: TextStyle(color: const Color.fromARGB(255, 43, 119, 45))),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
+// Widget _buildInfoRow(String label, String value) {
+//   return Padding(
+//     padding: EdgeInsets.symmetric(vertical: 4),
+//     child: Row(
+//       mainAxisAlignment: MainAxisAlignment.center, // لضبط النص بالكامل لليسار
+//       children: [
+//         Expanded(
+//           flex: 3,
+//           child: Text(label, style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.left),
+//         ),
+//         SizedBox(width: 8),
+//         Expanded(
+//           flex: 4,
+//           child: Text(value, textAlign: TextAlign.left),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () => _showDetails(context),
+//       child: Card(
+//         elevation: 8,
+//         shadowColor: const Color.fromARGB(255, 78, 117, 78).withOpacity(0.7),
+//         color: const Color.fromARGB(255, 238, 241, 239),                                     
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+//         child: Row(
+//           children: [
+//             ClipRRect(
+//               borderRadius: const BorderRadius.only(
+//                 topLeft: Radius.circular(20),
+//                 bottomLeft: Radius.circular(20),
+                
+//               ),
+//               child: Image.asset(
+//                 imagePath,
+//                 height: 120,
+//                 width: 110,
+//                 fit: BoxFit.cover,
+//               ),
+//             ),
+//             const SizedBox(width: 16), Close
+//             Expanded(
+//               child: Padding(
+//                 padding: const EdgeInsets.symmetric(vertical: 10),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       title,
+//                       style: const TextStyle(
+//                         fontSize: 20,
+//                         fontWeight: FontWeight.bold,
+//                         color: Color.fromARGB(255, 42, 97, 46),
+//                         fontFamily: 'Cairo',
+//                       ),
+//                     ),
+//                     const SizedBox(height: 5),
+//                     Text(
+//                       description,
+//                       style: const TextStyle(
+//                         fontSize: 14,
+//                         color: Color.fromARGB(255, 109, 119, 114),
+//                         fontFamily: 'Cairo',
+//                       ),
+//                       maxLines: 2,
+//                       overflow: TextOverflow.ellipsis,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//             const Padding(
+//               padding: EdgeInsets.only(right: 10),
+//               child: Icon(Icons.info_outline, color: Color.fromARGB(255, 20, 54, 22),),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+// class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
+//   final double minHeight;
+//   final double maxHeight;
+//   final Widget child;
+
+//   _SliverHeaderDelegate({
+//     required this.minHeight,
+//     required this.maxHeight,
+//     required this.child,
+//   });
+
+//   @override
+//   double get minExtent => minHeight;
+
+//   @override
+//   double get maxExtent => maxHeight;
+
+//   @override
+//   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+//     return SizedBox.expand(child: child);
+//   }
+
+//   @override
+//   bool shouldRebuild(_SliverHeaderDelegate oldDelegate) {
+//     return maxHeight != oldDelegate.maxHeight ||
+//         minHeight != oldDelegate.minHeight ||
+//         child != oldDelegate.child;
+//   }
+// }  
+
+class VegetableCard extends StatelessWidget {
+  final String imagePath;
+  final String title;
+  final String description;
+
+  const VegetableCard({
+    super.key,
+    required this.imagePath,
+    required this.title,
+    required this.description,
+  });
+
+  void _showDetails(BuildContext context) {
+    String bestSeason = '';
+    String growthDuration = '';
+    String waterRequirement = '';
+    String careInstructions = '';
+
+    switch (title.toLowerCase()) {
+      case 'strawberry':
+        bestSeason = 'Spring and Fall';
+        growthDuration = '3 to 4 months';
+        waterRequirement = 'Regular watering, keep soil moist';
+        careInstructions = 'Trim damaged leaves, mulch with straw';
+        break;
+
+      case 'peas':
+        bestSeason = 'Winter and early Spring';
+        growthDuration = '60 to 70 days';
+        waterRequirement = 'Moderate watering, avoid dryness';
+        careInstructions = 'Provide climbing support, remove weeds';
+        break;
+
+      case 'potatoes':
+        bestSeason = 'Late Winter to early Spring';
+        growthDuration = '90 to 120 days';
+        waterRequirement = 'Regular watering during tuber formation';
+        careInstructions = 'Check size by digging, remove infected plants';
+        break;
+
+      case 'carrot':
+        bestSeason = 'Fall and Spring';
+        growthDuration = '70 to 80 days';
+        waterRequirement = 'Keep soil moist';
+        careInstructions = 'Thin seedlings, ensure loose soil';
+        break;
+
+      case 'wheat':
+        bestSeason = 'Fall (winter wheat) or Spring (spring wheat)';
+        growthDuration = '110 to 130 days';
+        waterRequirement = 'Moderate watering';
+        careInstructions = 'Ensure nitrogen, control weeds';
+        break;
+
+      case 'broccoli':
+        bestSeason = 'Cool seasons (Fall and Spring)';
+        growthDuration = '80 to 100 days';
+        waterRequirement = '1-1.5 inches per week';
+        careInstructions = 'Full sun, fertilize, protect from pests';
+        break;
+
+      case 'eggplant':
+        bestSeason = 'Summer and early Fall';
+        growthDuration = '100 to 120 days';
+        waterRequirement = 'Keep soil consistently moist';
+        careInstructions = 'Stake plants, fertilize, monitor pests';
+        break;
+
+      case 'corn':
+        bestSeason = 'Spring and Summer';
+        growthDuration = '60 to 100 days';
+        waterRequirement = 'Frequent watering during pollination';
+        careInstructions = 'Plant in blocks, weed regularly';
+        break;
+
+      case 'mango':
+        bestSeason = 'Spring (tropical)';
+        growthDuration = '3 to 5 years';
+        waterRequirement = 'Deep weekly watering';
+        careInstructions = 'Prune, fertilize, protect from frost';
+        break;
+
+      case 'kiwi':
+        bestSeason = 'Spring and early Summer';
+        growthDuration = '3 to 5 years';
+        waterRequirement = 'Regular deep watering';
+        careInstructions = 'Provide trellis, prune yearly';
+        break;
+
+      case 'taro':
+        bestSeason = 'Warm seasons (Spring and Summer)';
+        growthDuration = '180 to 200 days';
+        waterRequirement = 'Constantly moist soil';
+        careInstructions = 'Warm soil, well-drained';
+        break;
+
+      default:
+        bestSeason = 'Suitable season for the type';
+        growthDuration = 'Approximate growth duration';
+        waterRequirement = 'Appropriate water amount';
+        careInstructions = 'Moderate care as needed';
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFf1f1ef),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Information about $title',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24, // زيادة حجم الخط هنا
+                    color: Color.fromARGB(255, 33, 95, 35), // اللون الزيتي
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Divider(thickness: 1.2),
+                const SizedBox(height: 10),
+                _buildInfoRow(Icons.calendar_month, 'Best planting season:', bestSeason),
+                _buildInfoRow(Icons.timelapse, 'Growth duration:', growthDuration),
+                _buildInfoRow(Icons.water_drop, 'Water requirement:', waterRequirement),
+                _buildInfoRow(Icons.nature, 'Care instructions:', careInstructions),
+                _buildInfoRow(Icons.info_outline, 'Additional info:', description),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: Color.fromARGB(255, 43, 119, 45)),
+                    label: const Text('Close', style: TextStyle(color: Color.fromARGB(255, 43, 119, 45))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8), // زيادة المسافة بين الكلمات
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 22, color: Color.fromARGB(255, 43, 119, 45)), // تكبير حجم الأيقونة
+          const SizedBox(width: 12),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 16, color: Colors.black, fontFamily: 'Cairo'), // تكبير الخط
+                children: [
+                  TextSpan(text: '$label ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showDetails(context),
+      child: Card(
+        elevation: 8,
+        shadowColor: const Color.fromARGB(255, 78, 117, 78).withOpacity(0.7),
+        color: const Color.fromARGB(255, 238, 241, 239),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
+              ),
+              child: Image.asset(
+                imagePath,
+                height: 120,
+                width: 110,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 24, // زيادة حجم الخط هنا
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 42, 97, 46), // اللون الزيتي
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 16, // تكبير حجم الخط
+                        color: Color.fromARGB(255, 109, 119, 114),
+                        fontFamily: 'Cairo',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: Icon(Icons.info_outline, color: Color.fromARGB(255, 20, 54, 22)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  _SliverHeaderDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(_SliverHeaderDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
+  }
+}

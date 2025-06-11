@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
+import 'package:hellow/pages/EditProfilePage.dart';
+import 'package:hellow/pages/plant_prediction_screen.dart';
+import 'package:hellow/pages/splash_screen.dart';
+import 'package:hellow/pages/register_page.dart';
+import 'package:hellow/pages/home_page.dart';
+import 'package:hellow/pages/chat_page.dart';
+import 'package:hellow/pages/community_page.dart';
+import 'package:hellow/pages/soil_page.dart';
+import 'package:hellow/pages/irrigation_page.dart';
+import 'package:hellow/pages/login_page.dart';
+import 'package:hellow/services/analysis_provider.dart';
+import 'package:hellow/services/analysis_service.dart';
+import 'package:hellow/services/ml_service.dart';
+
+// تعريف اللون الكريمي
+const kBackgroundColor = Color(0xFFF5F2E8); // الكريمي
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Green Grow',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      home: const SplashScreen(),
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/main': (context) => const NavigationScreen(),
+        '/register': (context) => const RegisterPage(),
+        '/edit-profile': (context) => const EditProfilePage(),
+      },
+    );
+  }
+}
+
+class NavigationScreen extends StatefulWidget {
+  const NavigationScreen({super.key});
+
+  @override
+  State<NavigationScreen> createState() => _NavigationScreenState();
+}
+
+class _NavigationScreenState extends State<NavigationScreen> {
+  int _currentIndex = 2;
+  bool isInitialized = false;
+
+  final analysisService = AnalysisService();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  final List<Widget> _pages = [
+    const CommunityPage(),
+    const PlantPredictionScreen(),
+    const HomePage(),
+    const ChatPage(),
+    IrrigationPage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBackgroundColor, // تعيين اللون الكريمي كخلفية
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.green[900],
+        selectedItemColor: const Color.fromARGB(255, 68, 119, 75),
+        unselectedItemColor: const Color.fromARGB(255, 180, 192, 181),
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Community'),
+          BottomNavigationBarItem(icon: Icon(Icons.eco), label: 'Soil'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.water_drop), label: 'Irrigation'),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "186289405077",
+    "project_id": "green-grow-64152",
+    "storage_bucket": "green-grow-64152.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186289405077:android:9ac5fcb63b01135dfa6f9c",
+        "android_client_info": {
+          "package_name": "com.example.hellow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0aW7uhJVJ0RuBh2V0iWsKpO6yJqjMDJU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
